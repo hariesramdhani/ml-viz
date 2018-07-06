@@ -1,0 +1,259 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Overpowered Heroes</title>
+        <meta name="description" content="Overpowered Heroes">
+        <meta name="author" content="Haries Ramdhani">
+        <link rel="shortcut icon" type="image/png" href="/assets/img/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css?family=Scope+One|Source+Sans+Pro|Press+Start+2P" rel="stylesheet">
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <style>
+            p {
+                font-family: "Source Sans Pro";
+            }
+        </style>
+    </head>
+    <body>
+        <div id="tooltip" class="hidden">
+                <h2><strong><span id="hero">Important Label heading</span></strong></h2>
+                <!-- <p><span id="value">100</span></p> -->
+            </div>
+        <span style="font-family: 'Source Sans Pro';">Select hero  </span> <select class="select-style" id="hero-selection-corr">
+            </select>
+        <div class="hero-correlation" style="text-align: center;">
+        </div>
+
+        <script>
+            var marginCorr = {top: 20, right: 50, bottom: 30, left: 50},
+                widthCorr = 700 - marginCorr.left - marginCorr.right,
+                heightCorr = 100 - marginCorr.top - marginCorr.bottom;
+    
+            // // parse the date / time
+            // var parseTime = d3.timeParse("%Y%m");
+    
+            // // set the ranges
+            // var xCorr = d3.scaleTime().range([0, widthCorr]);
+
+            var corr = d3.select(".hero-correlation").append("svg")
+                .attr("class", "corr")
+                .attr("width", widthCorr + marginCorr.left + marginCorr.right)
+                .attr("height", heightCorr + marginCorr.top + marginCorr.bottom)
+                .append("g")
+                .attr("transform","translate(" + marginCorr.left + "," + marginCorr.top + ")")
+                .style("fill", "grey");
+            
+            d3.json("hero-correlation.json", function(error, data) {
+                if (error) {
+                    throw error;
+                }
+
+                // data.forEach(function(d){
+                //     d["corr"].forEach(function(c){
+                //         c.mention = +c.mention;
+                //     })
+                // })
+
+                var corrSelect = d3.select("#hero-selection-corr")
+                
+                var corrOptions = corrSelect
+                    .selectAll('option')
+                    .data(data)
+                    .enter()
+                    .append('option')
+                    .text(function(d){
+                        return d["hero"].charAt(0).toUpperCase() + d["hero"].slice(1);
+                    });
+                
+                name = "akai";
+
+                for (i=0; i< data.length; i++) {
+                    if (data[i].hero == name) {
+                        usableDataIndex = i;        
+                        break;
+                    }
+                }
+
+                data = data.slice(usableDataIndex, usableDataIndex+1);
+                
+                // console.log(data);
+
+                corrImgContainer= corr.selectAll(".corr-image-container")
+                        .data(data)
+                        .enter()
+                        .append("g")
+                        .attr("class", "corr-image-container")
+                        .style("text-align", "center")
+                        .style("width", 750)
+                        .style("height", 100)
+                        .selectAll(".corr-image-block")
+                        .data(function(d) {
+                            // console.log(d["corr"]);
+                            return d["corr"];
+                        })
+                        .enter()
+                        .append("g")
+                        .attr("class", "corr-image-block")
+                        .style("display", "inline-block");
+
+                corrImgContainer.append("image")
+                    .attr("class", "corr-image")
+                    .attr("height", 45)
+                    .attr("width", 45)
+                    .style("padding", "0 2.5px")
+                    .attr("preserveAspectRatio", "none")
+                    .attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
+                    .attr("xlink:href", function(d) {
+                        imagePath = "flair/" + d["name"].toLowerCase() + ".png";
+                        return imagePath;
+                    })
+                    .attr("x", function(d,i) {
+                        return (widthCorr/8 * i - 20);
+                    })
+                    .attr("transform", "translate(0," + (heightCorr - 65) + ")")
+                    // .attr("preserveAspectRatio", "none")
+                    // .attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
+
+                corrImgContainer.append("text")
+                    .attr("class", "corr-hero-details")
+                    .html(function(d) {
+                        return d["mention"] + "%";
+                    })
+                    .style("size", 8)
+                    .style("font-family", "Source Sans Pro")
+                    .style("color", "black")
+                    .attr("x", function(d,i) {
+                        return (widthCorr/7.875 * i - 20);
+                    })
+                    .attr("transform", "translate(0," + (heightCorr) + ")")
+                    // .attr("x", function(d,i) {
+                    //     return (widthCorr/11 * i - 20);
+                    // })
+                    // .attr("transform", "translate(0," + (heightCorr - 60) + ")")
+                    
+            });
+
+    var dropdown = d3.select("#hero-selection-corr")
+        .on("change", function(){
+            var newHero = d3.select(this).property('value');
+            corr.selectAll(".corr-image-container").remove();
+            updateHeroCorrData(newHero);
+        });
+
+    var updateHeroCorrData = function(heroName) {
+        d3.json("hero-correlation.json", function(error, data) {
+                if (error) {
+                    throw error;
+                }
+
+                // data.forEach(function(d){
+                //     d["corr"].forEach(function(c){
+                //         c.mention = +c.mention;
+                //     })
+                // })
+
+                corr.exit().remove();
+                
+                name = heroName.toLowerCase();
+                console.log(name);
+                usableDataIndex = 0;
+
+                for (i=0; i< data.length; i++) {
+                    if (data[i].hero == name) {
+                        usableDataIndex = i;
+                        // console.log(i)        
+                        break;
+                    }
+                }
+
+                data = data.slice(usableDataIndex, usableDataIndex+1);
+                
+                corr.selectAll(".corr-image-container").exit().remove();
+
+                console.log(data)
+
+                corrImgContainer= corr.selectAll(".corr-image-container")
+                        .data(data)
+                        .enter()
+                        .append("g")
+                        .attr("class", "corr-image-container")
+                        .style("text-align", "center")
+                        .style("width", 750)
+                        .style("height", 100)
+                        .selectAll(".corr-image-block")
+                        .data(function(d) {
+                            // console.log(d["corr"]);
+                            return d["corr"];
+                        })
+                        .enter()
+                        .append("g")
+                        .attr("class", "corr-image-block")
+                        .style("display", "inline-block");
+
+                corrImgContainer.append("image")
+                    .attr("class", "corr-image")
+                    .attr("height", 45)
+                    .attr("width", 45)
+                    .style("padding", "0 2.5px")
+                    .attr("preserveAspectRatio", "none")
+                    .attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
+                    .attr("xlink:href", function(d) {
+                        imagePath = "flair/" + d["name"].toLowerCase() + ".png";
+                        return imagePath;
+                    })
+                    .attr("x", function(d,i) {
+                        return (widthCorr/8 * i - 20);
+                    })
+                    .attr("transform", "translate(0," + (heightCorr - 65) + ")")
+                    // .attr("preserveAspectRatio", "none")
+                    // .attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
+
+                corrImgContainer.append("text")
+                    .attr("class", "corr-hero-details")
+                    .html(function(d) {
+                        return d["mention"] + "%";
+                    })
+                    .style("size", 8)
+                    .style("font-family", "Source Sans Pro")
+                    .style("color", "black")
+                    .attr("x", function(d,i) {
+                        return (widthCorr/7.875 * i - 20);
+                    })
+                    .attr("transform", "translate(0," + (heightCorr) + ")")
+
+                // corrImgContainer= corr.selectAll(".corr-image-container")
+                //         .data(data)
+                //         .enter()
+                
+                //         .selectAll(".corr-image-block")
+                //         .data(function(d) {
+                //             console.log(d);
+                //             return d["corr"];
+                //         })
+                //         .enter();
+
+                // corrImgContainer.selectAll(".corr-image")
+                //     .attr("class", "corr-image")
+                //     .attr("height", 45)
+                //     .attr("width", 45)
+                //     .style("padding", "0 2.5px")
+                //     .attr("preserveAspectRatio", "none")
+                //     .attr("xlink:href", function(d) {
+                //         imagePath = "flair/" + d["name"].toLowerCase() + ".png";
+                //         return imagePath;
+                //     })
+                //     .attr("x", function(d,i) {
+                //         return (widthCorr/8 * i - 20);
+                //     })
+                //     .attr("transform", "translate(0," + (heightCorr - 65) + ")")
+
+                // corrImgContainer.selectAll(".corr-hero-details")
+                //     .html(function(d) {
+                //         return d["mention"] + "%";
+                //     })
+            
+            });
+    }
+        </script>
+    </body>
+</html>

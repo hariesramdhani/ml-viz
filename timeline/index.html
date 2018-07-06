@@ -1,0 +1,113 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Overpowered Heroes</title>
+        <meta name="description" content="Overpowered Heroes">
+        <meta name="author" content="Haries Ramdhani">
+        <link rel="shortcut icon" type="image/png" href="/assets/img/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css?family=Scope+One|Source+Sans+Pro|Press+Start+2P" rel="stylesheet">
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <style>
+            #tooltip {
+                position: absolute;
+                widthTimeline: auto;
+                heightTimeline: auto;
+                padding: 10px;
+                background-color: rgba(0, 0, 0, 0.4);
+                border-radius: 10px;
+                pointer-events: none;
+            }
+            
+            #tooltip.hidden {
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <div id="tooltip" class="hidden">
+                <h2><strong><span id="hero">Important Label heading</span></strong></h2>
+                <!-- <p><span id="value">100</span></p> -->
+            </div>
+        <div class="hero-popularity-timeline" style="text-align: center;">
+        </div>
+
+        <script>
+            var marginTimeline = {top: 20, right: 50, bottom: 30, left: 50},
+                widthTimeline = 860 - marginTimeline.left - marginTimeline.right,
+                heightTimeline = 150 - marginTimeline.top - marginTimeline.bottom;
+    
+            // parse the date / time
+            var parseTime = d3.timeParse("%Y%m");
+    
+            // set the ranges
+            var xTimeline = d3.scaleTime().range([0, widthTimeline]);
+
+            var timeline = d3.select(".hero-popularity-timeline").append("svg")
+                .attr("class", "timeline")
+                .attr("widthTimeline", widthTimeline + marginTimeline.left + marginTimeline.right)
+                .attr("heightTimeline", heightTimeline + marginTimeline.top + marginTimeline.bottom)
+                .append("g")
+                .attr("transform","translate(" + marginTimeline.left + "," + marginTimeline.top + ")")
+                .style("fill", "grey");
+
+            d3.tsv("timeline.txt", function(error, data) {
+                if (error) {
+                    throw error;
+                }
+
+                data.forEach(function(d) {
+                    d.date = parseTime(d.date);
+                    d.hero = d.hero;
+                });
+            
+                xTimeline.domain(d3.extent(data, function(d) { return d.date;}));
+
+                timeline.append("g")
+                    .attr("class", "x axis")
+                    .attr("transform", "translate(0," + heightTimeline + ")")
+                    .call(d3.axisBottom(x));
+
+                timeline.selectAll(".heroes")
+                    .data(data)
+                    .enter()
+                    .append("image")
+                    .attr("height", 50)
+                    .attr("width", 50)
+                    .attr("preserveAspectRatio", "none")
+                    .attr("xmlns:xlink", "http://www.w3.org/1999/xlink")
+                    .attr("xlink:href", function(d) {
+                        imagePath = "flair/" + d["hero"].toLowerCase() + ".png";
+                        return imagePath;
+                    })
+                    .attr("x", function(d,i) {
+                        return (widthTimeline/11 * i - 20);
+                    })
+                    .attr("transform", "translate(0," + (heightTimeline - 60) + ")")
+                    .on("mouseover", function(d) {
+
+                        var coordinates = [0, 0]
+                        coordinates = d3.mouse(this);
+                        var x = coordinates[0];
+                        var y = coordinates[1];
+
+
+                        d3.select("#tooltip")
+                            .classed("hidden", false)
+                            .style("text-align", "center")
+                            .style("left", x + 60 + "px")
+                            .style("top", y + 60 + "px")
+                            .select("#hero")
+                            .text(d["hero"]);
+                    })
+                    .on("mouseout", function() {
+                        d3.select("#tooltip")
+                            .classed("hidden", true)
+                    })
+                    ;
+                });
+
+
+        </script>
+    </body>
+</html>

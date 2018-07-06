@@ -1,0 +1,46 @@
+<!DOCTYPE HTML>
+<html lang="en">
+    <head>
+        <meta charset="utf-8">
+        <title>Overpowered Heroes</title>
+        <meta name="description" content="Overpowered Heroes">
+        <meta name="author" content="Haries Ramdhani">
+        <link rel="shortcut icon" type="image/png" href="/assets/img/favicon.ico" />
+        <link href="https://fonts.googleapis.com/css?family=Scope+One|Source+Sans+Pro|Press+Start+2P" rel="stylesheet">
+        <script src="https://d3js.org/d3.v4.min.js"></script>
+        <style>
+            * {
+                font-family: "Source Sans Pro";
+            }
+        </style>
+    </head>
+    <body>
+        <div class="scatter-plot" style="text-align: center;">
+        </div>
+
+        <script>
+            var marginScatter = {top: 20, right: 50, bottom: 30, left: 50},
+                widthScatter = 700 - marginScatter.left - marginScatter.right,
+                heightScatter = 100 - marginScatter.top - marginScatter.bottom;
+    
+            // // parse the date / time
+            // var parseTime = d3.timeParse("%Y%m");
+    
+            // // set the ranges
+            // var xScatter = d3.scaleTime().range([0, widthScatter]);
+
+            var scatterPlot = d3.select(".scatter-plot").append("svg")
+                .attr("class", "scatter")
+                .attr("width", widthScatter + marginScatter.left + marginScatter.right)
+                .attr("height", heightScatter + marginScatter.top + marginScatter.bottom)
+                .append("g")
+                .attr("transform","translate(" + marginScatter.left + "," + marginScatter.top + ")")
+                .style("fill", "grey");
+            
+            var xScatter = d3.scaleLinear().range([0, width])
+            var yScatter = d3.scaleLinear().range([height, 0])
+            
+
+        </script>
+    </body>
+</html>
